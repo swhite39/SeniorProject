@@ -1,0 +1,30 @@
+﻿Setting Static IP Address On Raspberry Pi
+
+Viewing your IP address:
+	- $: sudo ifconfig
+	- Wireless network information will be under wlan
+
+Viewing the IP Address of your Gateway:
+	- This is the IP address of your router
+	-$: sudo route -nee
+
+To create a static IP address edit the dhcpcd.conf file
+	-$: sudo vim /etc/dhcpcd.conf
+	- Scroll to the bottom of the file and add these lines:
+
+		interface wlan0
+
+		static ip_address=10.0.0.200/24
+	
+		static routers=10.0.0.1
+
+		static domain_name_servers=10.0.0.1
+
+	- The above addresses will change depending on the IP address of your router and the IP that you want.
+	- Reboot the Pi and test the changes:
+		-$: sudo reboot
+		-$: sudo ifconfig
+To make sure everything is working properly, ping your Gateway address 5 times to ensure you are communicating with your router.
+	-$: ping 10.0.0.1 -c 5
+	
+
