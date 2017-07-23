@@ -39,11 +39,15 @@ int main()
 
   /*---- Accept call creates a new socket for the incoming connection ----*/
   addr_size = sizeof serverStorage;
-  newSocket = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
+  cout << addr__size << endl;
 
-  /*---- Send message to the socket of the incoming connection ----*/
-  strcpy(buffer,"Hello World\n");
-  send(newSocket,buffer,13,0);
+  //newSocket = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
 
+  while(accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size) != -1)
+  {
+    /*---- Send message to the socket of the incoming connection ----*/
+    strcpy(buffer,"Hello World\n");
+    send(newSocket,buffer,13,0); 
+  }
   return 0;
 }
