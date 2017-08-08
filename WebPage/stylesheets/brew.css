@@ -1,0 +1,22 @@
+#optionsForm
+{
+	text-align: center;
+	border-style: solid;
+	border-color: #00CCFF;
+	width: 50%;
+	margin: 0% 25% 0% 25%;
+	color: #000066;
+	background-color: grey;
+}
+#optionsHeader
+{
+	text-align: center;
+	margin: 10% 25% 0% 25%;
+	color: #00CCFF;
+	background-color: grey;
+}
+#space
+{
+	width: 100%;
+	background-color: grey;
+}

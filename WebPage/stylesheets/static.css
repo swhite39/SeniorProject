@@ -1,0 +1,38 @@
+*
+{
+	background-color: #000066;
+}
+body
+{
+	background-color: grey;
+	display: block;
+	height: 100%;
+}
+#header
+{
+	background-color: #000066;
+	height: 10%;
+	width: 100%;
+}
+#title
+{
+	color: #00CCFF;
+	text-align: center;
+	font-family: Cursive;
+}
+#navBar
+{
+	width: 100%;
+	font-size: 90%;
+	text-align: center;
+	background-color: #000066;
+}
+ul
+{
+	margin: 0% 30% 0% 30%;
+}
+li
+{
+	display:inline;
+	margin-right: 5%;
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title> Scott's Coffee Machine </title>
+		<meta charset="utf-8">
+
+		<!-- Latest compiled and minified BootStrap CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- jQuery BootStrap library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+		<!-- Latest compiled BootStrap JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<!-- Stylesheet for HomePage -->
+		<link href="stylesheets/index.css" type="text/css" rel="stylesheet"/>
+		<link href="stylesheets/static.css" type="text/css" rel="stylesheet"/>
+
+	</head>
+	<body>
+
+		<script type='text/JavaScript'>
+			function resizeElementHeight(element) 
+			{
+	  			var height = 0;
+				var body = window.document.body;
+				if (window.innerHeight) {
+				    height = window.innerHeight;
+				} else if (body.parentElement.clientHeight) {
+				    height = body.parentElement.clientHeight;
+				} else if (body && body.clientHeight) {
+				    height = body.clientHeight;
+				}
+	  			element.style.height = ((height - element.offsetTop - 40) + "px");
+			}
+		</script>			
+
+		<div id="header">
+			<h1 id="title"> Scott's Coffee Machine </h1>	
+		</div>
+
+		<div id="navBar">
+			<ul>
+				<li> <a href="index.html">Home</a> </li>
+				<li> <a href="brew.html">Brew Coffee</a> </li>
+				<li> <a href="index.html">Gallery</a> </li>
+				<li> <a href="index.html">Contact Us</a> </li>
+			</ul>
+		</div>
+
+		<h1 id="storyHeader"> My Story </h1>
+		<br>
+		<p id = "bio"> Since I became addicted to coffee, I have always dreaded the first five minutes of the morning when I have to make coffee and drowsily wait for it to be done. To solve this I could have bought a coffe machine that brews based on a timer, but that leaves me in a new dilema. Now I have to make sure I emptied and replaced the grounds before the timer starts, and I am bound to a schedule I don't necesarilly want to follow. Thinking about how horrible this whole dilema is, and how it's ridiculous that a 21st century milennial has to endure this every morning I decided to come up with a solution. So I designed an autonomous coffee pot that brews on command via cellphone or computer. All you have to do is open the app, select how much coffee you want to brew and you are well on your way to a delicously fresh pot of coffee.
+		</p>
+
+		<div id="space"> </div>
+		<script> resizeElementHeight(space);</script>
+
+	</body>
+</html>

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title> Autonomous Brewing </title>
+		<meta charset="utf-8">
+
+		<!-- Latest compiled and minified BootStrap CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- jQuery BootStrap library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+		<!-- Latest compiled BootStrap JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<!-- Stylesheet for HomePage -->
+		<link href="stylesheets/static.css" type="text/css" rel="stylesheet"/>
+		<link href="stylesheets/brew.css" type="text/css" rel="stylesheet"/>
+
+	</head>
+	<body>
+
+		<script type='text/JavaScript'>
+			function resizeElementHeight(element) 
+			{
+	  			var height = 0;
+				var body = window.document.body;
+				if (window.innerHeight) {
+				    height = window.innerHeight;
+				} else if (body.parentElement.clientHeight) {
+				    height = body.parentElement.clientHeight;
+				} else if (body && body.clientHeight) {
+				    height = body.clientHeight;
+				}
+	  			element.style.height = ((height - element.offsetTop - 40) + "px");
+			}
+		</script>
+
+		<div id="header">
+			<h1 id="title"> Scott's Coffee Machine </h1>	
+		</div>
+
+		<div id="navBar">
+			<ul>
+				<li> <a href="index.html">Home</a> </li>
+				<li> <a href="brew.html">Brew Coffee</a> </li>
+				<li> <a href="index.html">Gallery</a> </li>
+				<li> <a href="index.html">Contact Us</a> </li>
+			</ul>
+		</div>
+
+		<h1 id="optionsHeader"> Brew Options </h1>
+		<br>
+
+		<div id="optionsForm">
+
+			<form action="/action_page.php" id="options">
+			</form>
+
+			<br>
+			<p style="background-color:grey"> Cups of Coffee (Please select how many cups you would like to brew): </p>
+			<select name="cups" form="options" style="background-color:white">
+			  	<option value="2"> 2 </option>
+			  	<option value="4"> 4 </option>
+			  	<option value="6"> 6 </option>
+			  	<option value="8"> 8 </option>
+			  	<option value="10"> 10 </option>
+			  	<option value="12"> 12 </option>
+			 </select>
+			 <br><br>
+
+			<p style="background-color:grey"> Brew Strength (Please select how strong you would like your coffee): </p>
+			<select name="strength" form="options" style="background-color:white">
+			  	<option value="Medium"> Medium </option>
+			  	<option value="Strong"> Strong </option>
+			  	<option value="Mild"> Mild </option>
+			 </select>
+			 <br> <br>
+
+			 <input type="submit" form="options" value="Start Brew" style="background-color:white">
+			 <br> <br>
+		</div>
+
+		<div id="space"> </div>
+		<script> resizeElementHeight(space);</script>
+
+	</body>
+</html>

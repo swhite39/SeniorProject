@@ -1,0 +1,24 @@
+
+#bio
+{
+	background-color: grey;
+	border-style: solid;
+	border-color: #00CCFF;
+	width: 60%;
+	margin: 0% 20% 0% 20%;
+	text-align: center;
+	color: #000066;
+	font-size: 150%;
+}
+#storyHeader
+{
+	margin: 7.5% 20% 0% 20%;
+	text-align: center;
+	color: #00CCFF;
+	background-color: grey;
+}
+#space
+{
+	width: 100%;
+	background-color: grey;
+}
