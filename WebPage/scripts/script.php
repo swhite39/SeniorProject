@@ -8,8 +8,9 @@
 
 	exec("./a.out $data1 $data2",$output);
 
-	foreach($output as $line)
+	/*foreach($output as $line)
 	{
 		echo "<li> $line </li>";
-	}
+	}*/
+	header("Location: http://localhost/WebPage/test.html");
 ?>

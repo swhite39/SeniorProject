@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title> Autonomous Brewing </title>
+        <meta charset="utf-8">
+
+        <!-- Latest compiled and minified BootStrap CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+        <!-- jQuery BootStrap library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+        <!-- Latest compiled BootStrap JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+        <!-- Stylesheet for HomePage -->
+        <link href="stylesheets/static.css" type="text/css" rel="stylesheet"/>
+        <link href="stylesheets/test.css" type="text/css" rel="stylesheet"/>
+
+    </head>
+    <body>
+
+        <script type='text/JavaScript'>
+
+            function resizeElementHeight(element) 
+            {
+                var height = 0;
+                var body = window.document.body;
+                if (window.innerHeight) {
+                    height = window.innerHeight;
+                } else if (body.parentElement.clientHeight) {
+                    height = body.parentElement.clientHeight;
+                } else if (body && body.clientHeight) {
+                    height = body.clientHeight;
+                }
+                element.style.height = ((height - element.offsetTop - 40) + "px");
+            }
+        </script>
+        <script type='text/JavaScript'>
+            function countdown()
+            {
+                var now = newDate();
+                var eventDate = new Date(2017, 11, 25);
+
+                var currentTime = now.getTime();
+                var eventTime = eventDate.getTime();
+
+                var remTime = eventTime - currentTime;
+
+                var s = Math.floor(remTime / 1000);
+                var m = Math.floor(s / 1000);
+                var h = Math.floor(m / 1000);
+                var d = Math.floor(h/ 1000);
+
+                h %= 24;
+                m %= 60;
+                s %= 60;
+
+                h = (h < 10) ? "0" + h : h;
+                m = (m < 10) ? "0" + m : m;
+                s = (s < 10) ? "0" + s : s;
+
+                document.getElementById("days").textContent = d;
+                document.getElementById("days").innerText = d;
+                document.getElementById("hours").textContent = h;
+                document.getElementById("minutes").innerText = m;
+                document.getElementById("seconds").textContent = s;
+
+                setTimeout(countdown,1000);
+            }
+        </script>
+
+        <div id="header">
+            <h1 id="title"> Scott's Coffee Machine </h1>    
+        </div>
+
+        <div id="navBar">
+            <ul>
+                <li> <a href="index.html">Home</a> </li>
+                <li> <a href="brew.html">Brew Coffee</a> </li>
+                <li> <a href="index.html">Gallery</a> </li>
+                <li> <a href="index.html">Contact Us</a> </li>
+            </ul>
+        </div>
+
+        <h1 id="clockHeader">Countdown Clock</h1>
+
+        <p id="demo"></p>
+
+         <div id="clockdiv">
+          <div>
+            <span id="days"></span>
+            <div class="smalltext">Days</div>
+          </div>
+          <div>
+            <span id="hours"></span>
+            <div class="smalltext">Hours</div>
+          </div>
+          <div>
+            <span id="minutes"></span>
+            <div class="smalltext">Minutes</div>
+          </div>
+          <div>
+            <span id="seconds"></span>
+            <div class="smalltext">Seconds</div>
+          </div>
+        </div> 
+
+        <script>
+        // Set how many seconds we are counting down for
+        var countDownDate = new Date().getTime() + (10 * 1000);
+
+        // Update the count down every 1 second
+        var x = setInterval(function() {
+
+            // Get todays date and time
+            var now = new Date().getTime();
+            
+            // Find the distance between now an the count down date
+            var distance = countDownDate - now;
+            
+            // Time calculations for days, hours, minutes and seconds
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            // Output the result to the correct html elements
+            document.getElementById("days").innerHTML = days;
+            document.getElementById("hours").innerHTML = hours;
+            document.getElementById("minutes").innerHTML = minutes;
+            document.getElementById("seconds").innerHTML = seconds;
+            
+            // If the count down is over take the user to the index page
+            if (distance < 0) 
+            {
+                clearInterval(x);
+                window.location.href = 'index.html';
+            }
+        }, 1000);
+        </script>
+
+        <div id="space"> </div>
+        <script> resizeElementHeight(space);</script>
+        <script type="text/Javascript"> countdown();</script>
+
+</body>
+</html>
