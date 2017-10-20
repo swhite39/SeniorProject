@@ -6,12 +6,19 @@
 		$data2 = $_GET["strength"];
 	}
 
-	exec("./a.out $data1 $data2",$output);
+	//exec("./a.out $data1 $data2",$output);
 
 	/*foreach($output as $line)
 	{
 		echo "<li> $line </li>";
 	}*/
+	$dbhost = 'localhost';
+	$dbuser = 'webuser';
+	$dbpass = 'secretpass';
+	$dbname = 'testing';
+	$connection = mysqli_connect($dbhost,$dbuser,$dbpass, $dbname);
+
+	mysqli_close($connection);
 	if($data1 == 2)
 	{
 		header("Location: http://localhost/WebPage/countdown2.html");
