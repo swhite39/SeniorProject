@@ -1,3 +1,11 @@
+/*******************
+ * 
+ * 
+ * Pin0 = A  Motor
+ * Pin1 = A' Motor
+ * Pin2 = B  Motor
+ * Pin3 = B' Motor
+ * ******************/
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -9,6 +17,7 @@
 #include <fcntl.h>
 #include <sys/uio.h>
 #include <wiringPi.h>
+#include <utility>
 
 #define MAX_PENDING 1  // Maximum number of pending connections on the socket
 #define MAX_BYTES 1500 // Maximum number of bytes per packet
@@ -24,6 +33,14 @@ int main(int argc, char *argv[])
   int s, new_s;
   int bytesRead, bytesSent;
   int fd;
+  int motorStep;
+  int motorStepArray[4][4] = 
+  {
+    {1,0,1,0},
+    {0,1,1,0},
+    {0,1,0,1},
+    {1,0,0,1}
+  };
 
   // Build address data structure
   memset(&hints, 0, sizeof(struct addrinfo));
@@ -80,10 +97,20 @@ int main(int argc, char *argv[])
   // GPIO testing
   wiringPiSetup();
   pinMode(0, OUTPUT);
-  for(int i=0;i < 10;i++)
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
+  // Handling 180 degree rotation on the stepper motor
+  for(int i=0;i < 180;i++)
   {
-    digitalWrite(0, HIGH); delay(500);
-    digitalWrite(0, LOW); delay(500);
+    motorStep = i%4;
+    for( int j=0; j < 4; j++)
+    {
+      digitalWrite(j,motorStepArray[motorStep][j]);
+    }
+    delay(100);
+    //digitalWrite(0, HIGH); delay(500);
+    //digitalWrite(0, LOW); delay(500);
   }
 
   /* Send file content to client
