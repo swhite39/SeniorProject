@@ -12,7 +12,6 @@
 #define MAX_BYTES 1500 // Maximum number of bytes per packet
 #define SERVER_NAME "127.0.0.1"
 #define SERVER_PORT "5000"
-#define ERROR_MESSAGE "Server Error (-1)" // Error message if file can't be opened by server 
 
 int main( int argc, char *argv[] )
 {
@@ -20,11 +19,9 @@ int main( int argc, char *argv[] )
   struct addrinfo *rp, *result;
   int s;
   char buf[MAX_BYTES];
-  int byteCount, bytesWritten;
-  int fd;
-  bool errorCheck = false;
-  char test[sizeof(ERROR_MESSAGE)] = ERROR_MESSAGE;
+  int byteCount;
   char *cups;
+
   if(argc > 1)
   {
     cups = argv[1];
@@ -65,66 +62,20 @@ int main( int argc, char *argv[] )
   }
   freeaddrinfo(result);
 
-  // Send the filename to the server
+  // Send the number of cups to the server
   send(s,cups,strlen(cups),0);
 
-  // Receive data from the server until error or orderly shutdown occurs
-  /*while((byteCount = recv(s,buf,MAX_BYTES,0)) > 0)
+  // Recieve brew status from the server
+  if ((byteCount = recv(s,buf,MAX_BYTES,0)) > 0)
   {
-    // Null terminate most significant character to prevent garbage
+    // Null terminate most significant character
     buf[byteCount] = 0;
 
-    // Check for file error on server side (only check once)
-    if(errorCheck == false)
-    {
-      // Prevent multiple iterations of the error check
-      errorCheck = true;
-      for(unsigned int i=0; i < sizeof(ERROR_MESSAGE); i++)
-      {
-        // No error occured so open file and proceed past the error checking 
-        if(buf[i] != test[i])
-        {
-          // Open the file in write mode and set fd as the file descriptor
-          // Create the file if it doesnt exist. Overwrite if it does exist
-          if( (fd = open(fileName, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR)) == -1)
-          {
-            fprintf(stderr, "Client Error: Unable to open file '%s' \n", fileName);
-            close(s);
-            exit(1);
-          }
-          break;
-        }
-
-        // Error occured on server side opening the file 
-        if(i == sizeof(ERROR_MESSAGE)-1)
-        {
-          fprintf(stderr, "Server Error: Unable to access file '%s' \n", fileName);
-          close(s);
-          close(fd);
-          exit(1);
-        }
-      }
-    }
-
-    // Write data from server to the file
-    if( (bytesWritten = write(fd, &buf, byteCount)) < 0)
-    {
-      fprintf(stderr, "Client Error: Unable to write to file '%s' \n", fileName);
-      close(s);
-      close(fd);
-      exit(1);
-    }
+    if(buf[0] == '1')
+      printf("1");
+    else
+      printf("2");
   }
-
-  // Error checking the receive function
-  if(byteCount < 0)
-  {
-    fprintf(stderr, "Client Error: Problem occured while receiving from '%s' \n", serverName);
-    close(s);
-    close(fd);
-    exit(1);
-  }*/
-
   close(s);
   return 0;
 }

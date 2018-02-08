@@ -8,7 +8,7 @@ client: client.cpp
 	g++ -Wall -o client client.cpp
 
 server: server.cpp
-	g++ -Wall -o server server.cpp -lWiringPi
+	g++ -Wall -o server server.cpp -lwiringPi
 
 Clean:
 	rm -f client server

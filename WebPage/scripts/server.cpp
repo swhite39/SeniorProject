@@ -32,13 +32,19 @@ int main(int argc, char *argv[])
   char buf[MAX_BYTES];
   int s, new_s;
   int bytesRead, bytesSent;
-  int fd;
+  // GPIO initialization
+  wiringPiSetup();
+  pinMode(0, OUTPUT);
+  pinMode(1, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(3, OUTPUT);
   int motorStep;
+  // Motor step sequence
   int motorStepArray[4][4] = 
   {
-    {1,0,1,0},
-    {0,1,1,0},
     {0,1,0,1},
+    {0,1,1,0},
+    {1,0,1,0},
     {1,0,0,1}
   };
 
@@ -77,53 +83,60 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  // Extract the first connection request for the listening socket
-  if( (new_s = accept(s, rp->ai_addr, &(rp->ai_addrlen))) < 0)
+  // Iterate evertime a new connection is established
+  while(1)
   {
-    close(s);
-    exit(1);
-  }
-    
-  // Receive the request that was sent from the client
-  if ( (bytesRead = recv(new_s, request, sizeof(request), 0)) < 0)
-  {
-    close(s);
-    close(new_s);
-    exit(1);
-  }
-  // Null terminate the request to prevent garbage
-  request[bytesRead] = 0;
 
-  // GPIO testing
-  wiringPiSetup();
-  pinMode(0, OUTPUT);
-  pinMode(1, OUTPUT);
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
-  // Handling 180 degree rotation on the stepper motor
-  for(int i=0;i < 180;i++)
-  {
-    motorStep = i%4;
-    for( int j=0; j < 4; j++)
+    // Extract the first connection request for the listening socket
+    if( (new_s = accept(s, rp->ai_addr, &(rp->ai_addrlen))) < 0)
     {
-      digitalWrite(j,motorStepArray[motorStep][j]);
+      close(s);
+      exit(1);
     }
-    delay(100);
-    //digitalWrite(0, HIGH); delay(500);
-    //digitalWrite(0, LOW); delay(500);
-  }
+    
+    // Receive the request that was sent from the client
+    if ( (bytesRead = recv(new_s, request, sizeof(request), 0)) < 0)
+    {
+      close(s);
+      close(new_s);
+      exit(1);
+    }
+    // Null terminate the request to prevent garbage
+    request[bytesRead] = 0;
 
-  /* Send file content to client
-  if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
-  {
-    close(s);
+    printf("%s \n", request);
+
+    // Handling 180 degree rotation on the stepper motor
+    for(int i=0;i < 200;i++)
+    {
+      motorStep = i%4;
+      for( int j=0; j < 4; j++)
+      {
+        digitalWrite(j,motorStepArray[motorStep][j]);
+      }
+      delay(5);
+    }
+
+    // Turn motor off to save power
+    digitalWrite(0,LOW);
+    digitalWrite(1,LOW);
+    digitalWrite(2,LOW);
+    digitalWrite(3,LOW);
+
+    buf[0] = '1';
+
+    // Send brew status to the client
+    if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
+    {
+      close(s);
+      close(new_s);
+      exit(1);
+    }
+
     close(new_s);
-    close(fd);
-    exit(1);
-  }*/
+  }
 
   // Close all file descriptors
-  close(new_s);
   freeaddrinfo(result);
   close(s);
   return 0;
