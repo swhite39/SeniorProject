@@ -71,10 +71,8 @@ int main( int argc, char *argv[] )
     // Null terminate most significant character
     buf[byteCount] = 0;
 
-    if(buf[0] == '1')
-      printf("1");
-    else
-      printf("2");
+    // Print the return value to identify success or possible errors
+    printf("%c", buf[0]);
   }
   close(s);
   return 0;

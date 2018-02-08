@@ -23,10 +23,16 @@
 #include <wiringPi.h>
 #include <utility>
 
-#define MAX_PENDING 1  // Maximum number of pending connections on the socket
-#define MAX_BYTES 1500 // Maximum number of bytes per packet
-#define ERROR_MESSAGE "Server Error (-1)" // Error message if file can't be opened
-#define SERVER_PORT "5000"
+// Server Info
+#define MAX_PENDING   1       // Maximum number of pending connections on the socket
+#define MAX_BYTES     1500    // Maximum number of bytes per packet
+#define SERVER_PORT   "5000"
+
+// Brew Status
+#define ALL_CLEAR     '1'     // Clear to start Brew
+#define NO_WATER      '2'     // Not enough water to start brew
+#define NO_GROUNDS    '3'     // Not enough coffee grounds to start brew
+#define NO_FILTER     '4'     // No clean filter to start brew
 
 int main(int argc, char *argv[])
 {
@@ -96,7 +102,6 @@ int main(int argc, char *argv[])
   // Iterate evertime a new connection is established
   while(1)
   {
-
     // Extract the first connection request for the listening socket
     if( (new_s = accept(s, rp->ai_addr, &(rp->ai_addrlen))) < 0)
     {
@@ -114,27 +119,117 @@ int main(int argc, char *argv[])
     // Null terminate the request to prevent garbage
     request[bytesRead] = 0;
 
-    printf("%s \n", request);
+    // Determine how many cups the user wants to brew
+    if(request[0] == '1')
+    {
+      // User wants 10 cups
+      if(request[1] == '0')
+      {
+        printf("10 cups\n");
 
-    // Open Coffee Valve
-    digitalWrite(5,HIGH);
-    delay(3000);
-    digitalWrite(5,LOW);
+        // Open Water Valve
+        digitalWrite(6,HIGH);
+        delay(3000);
+        digitalWrite(6,LOW);
+        // Open Coffee Valve
+        digitalWrite(5,HIGH);
+        delay(3000);
+        digitalWrite(5,LOW);
+      }
+      // User wants 12 cups
+      else if(request[1] == '2')
+      {
+        printf("12 cups\n");
+
+        // Open Water Valve
+        digitalWrite(6,HIGH);
+        delay(3000);
+        digitalWrite(6,LOW);
+        // Open Coffee Valve
+        digitalWrite(5,HIGH);
+        delay(3000);
+        digitalWrite(5,LOW);
+      }
+    }
+    else
+    {
+      // User wants 2 cups
+      if(request[0] == '2')
+      {
+        printf("2 cups\n");
+
+        // Open Water Valve
+        digitalWrite(6,HIGH);
+        delay(3000);
+        digitalWrite(6,LOW);
+        // Open Coffee Valve
+        digitalWrite(5,HIGH);
+        delay(3000);
+        digitalWrite(5,LOW);
+      }
+      // User wants 4 cups
+      else if(request[0] == '4')
+      {
+        printf("4 cups\n");
+
+        // Open Water Valve
+        digitalWrite(6,HIGH);
+        delay(3000);
+        digitalWrite(6,LOW);
+        // Open Coffee Valve
+        digitalWrite(5,HIGH);
+        delay(3000);
+        digitalWrite(5,LOW);
+      }
+      // User wants 6 cups
+      else if(request[0] == '6')
+      {
+        printf("6 cups\n");
+
+        // Open Water Valve
+        digitalWrite(6,HIGH);
+        delay(3000);
+        digitalWrite(6,LOW);
+        // Open Coffee Valve
+        digitalWrite(5,HIGH);
+        delay(3000);
+        digitalWrite(5,LOW);
+      }
+      // User wants 8 cups
+      else if(request[0] == '8')
+      {
+        printf("8 cups\n");
+
+        // Open Water Valve
+        digitalWrite(6,HIGH);
+        delay(3000);
+        digitalWrite(6,LOW);
+        // Open Coffee Valve
+        digitalWrite(5,HIGH);
+        delay(3000);
+        digitalWrite(5,LOW);
+      }
+    }
     // Close Coffee Valve
     digitalWrite(4,HIGH);
     delay(3000);
     digitalWrite(4,LOW);
-    // Open Water Valve
-    digitalWrite(6,HIGH);
-    delay(3000);
-    digitalWrite(6,LOW);
-    // Turn on Coffee Pot
-    digitalWrite(7,HIGH);
-    delay(3000);
-    digitalWrite(7,LOW);
+
+    // Brew Status
+    buf[0] = ALL_CLEAR;
+    buf[1] = '\0';
+
+    // Send brew status to the client to start countdown timer
+    if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
+    {
+      close(s);
+      close(new_s);
+      exit(1);
+    }
+    close(new_s);
 
     // Handling 180 degree rotation on the stepper motor
-    for(int i=0;i < 200;i++)
+    for(int i=0;i < 100;i++)
     {
       motorStep = i%4;
       for( int j=0; j < 4; j++)
@@ -150,17 +245,10 @@ int main(int argc, char *argv[])
     digitalWrite(2,LOW);
     digitalWrite(3,LOW);
 
-    buf[0] = '1';
-
-    // Send brew status to the client
-    if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
-    {
-      close(s);
-      close(new_s);
-      exit(1);
-    }
-
-    close(new_s);
+    // Turn on Coffee Pot
+    digitalWrite(7,HIGH);
+    delay(3000);
+    digitalWrite(7,LOW);
   }
 
   // Close all file descriptors
