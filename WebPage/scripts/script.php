@@ -6,15 +6,40 @@
 		$data2 = $_GET["strength"];
 	}
 
-//	header("Location: http://localhost/WebPage/countdown2.html");
 	exec("./client $data1 $data2",$output);
 
 	foreach($output as $line)
 	{
+		// If brew is possible go to countdown screen based on how many cups
 		if(strcmp($line,"Good") != 0)
 		{	
-			header("Location: http://localhost/WebPage/countdown2.html");
+			if($data1 == 2)
+			{
+				header("Location: http://localhost/WebPage/countdown2.html");
+			}
+
+			else if($data1 == 4)
+			{
+				header("Location: http://localhost/WebPage/countdown4.html");
+			}
+			else if($data1 == 6)
+			{
+				header("Location: http://localhost/WebPage/countdown6.html");
+			}
+			else if($data1 == 8)
+			{
+				header("Location: http://localhost/WebPage/countdown8.html");
+			}
+			else if($data1 == 10)
+			{
+				header("Location: http://localhost/WebPage/countdown10.html");
+			}
+			else if($data1 == 12)
+			{
+				header("Location: http://localhost/WebPage/countdown12.html");
+			}
 		}
+		// If brew is not possible display the error
 		else
 			header("Location: http://localhost/WebPage/index.html");
 	}

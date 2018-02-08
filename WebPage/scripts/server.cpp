@@ -5,6 +5,10 @@
  * Pin1 = A' Motor
  * Pin2 = B  Motor
  * Pin3 = B' Motor
+ * Pin4 = Close Coffee Valve
+ * Pin5 = Open Coffee Valve
+ * Pin6 = Open Water Valve
+ * Pin7 = Turn on Coffee Pot
  * ******************/
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -32,14 +36,20 @@ int main(int argc, char *argv[])
   char buf[MAX_BYTES];
   int s, new_s;
   int bytesRead, bytesSent;
+
   // GPIO initialization
   wiringPiSetup();
   pinMode(0, OUTPUT);
   pinMode(1, OUTPUT);
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
-  int motorStep;
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+
   // Motor step sequence
+  int motorStep;
   int motorStepArray[4][4] = 
   {
     {0,1,0,1},
@@ -105,6 +115,23 @@ int main(int argc, char *argv[])
     request[bytesRead] = 0;
 
     printf("%s \n", request);
+
+    // Open Coffee Valve
+    digitalWrite(5,HIGH);
+    delay(3000);
+    digitalWrite(5,LOW);
+    // Close Coffee Valve
+    digitalWrite(4,HIGH);
+    delay(3000);
+    digitalWrite(4,LOW);
+    // Open Water Valve
+    digitalWrite(6,HIGH);
+    delay(3000);
+    digitalWrite(6,LOW);
+    // Turn on Coffee Pot
+    digitalWrite(7,HIGH);
+    delay(3000);
+    digitalWrite(7,LOW);
 
     // Handling 180 degree rotation on the stepper motor
     for(int i=0;i < 200;i++)
