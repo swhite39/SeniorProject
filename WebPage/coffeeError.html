@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title> ERROR </title>
+		<meta charset="utf-8">
+
+		<!-- Latest compiled and minified BootStrap CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- jQuery BootStrap library -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+		<!-- Latest compiled BootStrap JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		<!-- Stylesheet for HomePage -->
+		<link href="stylesheets/static.css" type="text/css" rel="stylesheet"/>
+		<link href="stylesheets/brew.css" type="text/css" rel="stylesheet"/>
+
+	</head>
+	<body>
+
+		<script type='text/JavaScript'>
+			function resizeElementHeight(element) 
+			{
+	  			var height = 0;
+				var body = window.document.body;
+				if (window.innerHeight) {
+				    height = window.innerHeight;
+				} else if (body.parentElement.clientHeight) {
+				    height = body.parentElement.clientHeight;
+				} else if (body && body.clientHeight) {
+				    height = body.clientHeight;
+				}
+	  			element.style.height = ((height - element.offsetTop - 40) + "px");
+			}
+		</script>
+
+		<div id="header">
+			<h1 id="title"> Scott's Coffee Machine </h1>	
+		</div>
+
+		<div id="navBar">
+			<ul>
+				<li> <a href="index.html">Home</a> </li>
+				<li> <a href="brew.html">Brew Coffee</a> </li>
+				<li> <a href="index.html">Gallery</a> </li>
+				<li> <a href="index.html">Contact Us</a> </li>
+			</ul>
+		</div>
+
+        <h1 id="optionsHeader"> Error: Could not start brew </h1>
+		<br>
+		<h6> Please add coffee grounds to the coffee reservoir and try again</h6>
+
+		<div id="space"> </div>
+		<script> resizeElementHeight(space);</script>
+
+	</body>
+</html>
