@@ -42,17 +42,17 @@
 		// This is the case when there is not enough water for a brew
 		else if(strcmp($line,"2") == 0)
 		{
-			header("Location: http://localhost/index.html");
+			header("Location: http://localhost/WebPage/waterError.html");
 		}
 		// This is the case when there is not enough coffee grounds for a brew
 		else if(strcmp($line,"3") == 0)
 		{
-			header("Location: http://localhost/WebPage/index.html");
+			header("Location: http://localhost/WebPage/coffeeError.html");
 		}
 		// This is the case when there is no clean filters for a brew
 		else if(strcmp($line,"4") == 0)
 		{
-			header("Location: http://localhost/WebPage/index.html");
+			header("Location: http://localhost/WebPage/filterError.html");
 		}
 		// This case should never happen but just in case
 		else

@@ -216,7 +216,9 @@ int main(int argc, char *argv[])
     digitalWrite(4,LOW);
 
     // Brew Status
-    buf[0] = ALL_CLEAR;
+//    buf[0] = ALL_CLEAR;
+//
+    buf[0] = NO_WATER;
     buf[1] = '\0';
 
     // Send brew status to the client to start countdown timer
