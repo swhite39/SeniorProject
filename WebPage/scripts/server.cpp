@@ -1,14 +1,6 @@
 /*******************
  * 
  * 
- * Pin0 = A  Motor
- * Pin1 = A' Motor
- * Pin2 = B  Motor
- * Pin3 = B' Motor
- * Pin4 = Close Coffee Valve
- * Pin5 = Open Coffee Valve
- * Pin6 = Open Water Valve
- * Pin7 = Turn on Coffee Pot
  * ******************/
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -23,6 +15,18 @@
 #include <wiringPi.h>
 #include <utility>
 
+// Pins
+#define MOTOR_AP      0
+#define MOTOR_AN      1
+#define MOTOR_BP      2
+#define MOTOR_BN      3
+#define CLOSE_COFFEE  4
+#define OPEN_COFFEE   5
+#define OPEN_WATER    6
+#define COFFEE_POT    7
+#define WATER_TRIG    8
+#define WATER_ECHO    9
+
 // Server Info
 #define MAX_PENDING   1       // Maximum number of pending connections on the socket
 #define MAX_BYTES     1500    // Maximum number of bytes per packet
@@ -33,6 +37,8 @@
 #define NO_WATER      '2'     // Not enough water to start brew
 #define NO_GROUNDS    '3'     // Not enough coffee grounds to start brew
 #define NO_FILTER     '4'     // No clean filter to start brew
+
+int getDistance(unsigned int trigPin, unsigned int echoPin);
 
 int main(int argc, char *argv[])
 {
@@ -45,23 +51,29 @@ int main(int argc, char *argv[])
 
   // GPIO initialization
   wiringPiSetup();
-  pinMode(0, OUTPUT);
-  pinMode(1, OUTPUT);
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(6, OUTPUT);
-  pinMode(7, OUTPUT);
+  pinMode(MOTOR_AP, OUTPUT);
+  pinMode(MOTOR_AN, OUTPUT);
+  pinMode(MOTOR_BP, OUTPUT);
+  pinMode(MOTOR_BN, OUTPUT);
+  pinMode(CLOSE_COFFEE, OUTPUT);
+  pinMode(OPEN_COFFEE, OUTPUT);
+  pinMode(OPEN_WATER, OUTPUT);
+  pinMode(COFFEE_POT, OUTPUT);
+  pinMode(WATER_TRIG, OUTPUT); 
+  pinMode(WATER_ECHO, INPUT); 
 
   // Motor step sequence
   int motorStep;
-  int motorStepArray[4][4] = 
+  int motorStepArray[8][4] = 
   {
     {0,1,0,1},
+    {0,1,0,0},
     {0,1,1,0},
+    {0,0,1,0},
     {1,0,1,0},
-    {1,0,0,1}
+    {1,0,0,0},
+    {1,0,0,1},
+    {0,0,0,1}
   };
 
   // Build address data structure
@@ -119,6 +131,8 @@ int main(int argc, char *argv[])
     // Null terminate the request to prevent garbage
     request[bytesRead] = 0;
 
+    printf("Distance: %d\n",getDistance(WATER_TRIG,WATER_ECHO)); 
+    
     // Determine how many cups the user wants to brew
     if(request[0] == '1')
     {
@@ -128,13 +142,13 @@ int main(int argc, char *argv[])
         printf("10 cups\n");
 
         // Open Water Valve
-        digitalWrite(6,HIGH);
-        delay(3000);
-        digitalWrite(6,LOW);
+        digitalWrite(OPEN_WATER,HIGH);
+        delay(8000);
+        digitalWrite(OPEN_WATER,LOW);
         // Open Coffee Valve
-        digitalWrite(5,HIGH);
+        digitalWrite(OPEN_COFFEE,HIGH);
         delay(3000);
-        digitalWrite(5,LOW);
+        digitalWrite(OPEN_COFFEE,LOW);
       }
       // User wants 12 cups
       else if(request[1] == '2')
@@ -142,13 +156,13 @@ int main(int argc, char *argv[])
         printf("12 cups\n");
 
         // Open Water Valve
-        digitalWrite(6,HIGH);
-        delay(3000);
-        digitalWrite(6,LOW);
+        digitalWrite(OPEN_WATER,HIGH);
+        delay(8800);
+        digitalWrite(OPEN_WATER,LOW);
         // Open Coffee Valve
-        digitalWrite(5,HIGH);
+        digitalWrite(OPEN_COFFEE,HIGH);
         delay(3000);
-        digitalWrite(5,LOW);
+        digitalWrite(OPEN_COFFEE,LOW);
       }
     }
     else
@@ -159,13 +173,14 @@ int main(int argc, char *argv[])
         printf("2 cups\n");
 
         // Open Water Valve
-        digitalWrite(6,HIGH);
-        delay(3000);
-        digitalWrite(6,LOW);
+        digitalWrite(OPEN_WATER,HIGH);
+        //delay(3300);
+        delay(8000);
+        digitalWrite(OPEN_WATER,LOW);
         // Open Coffee Valve
-        digitalWrite(5,HIGH);
-        delay(3000);
-        digitalWrite(5,LOW);
+        //digitalWrite(OPEN_COFFEE,HIGH);
+        //delay(3000);
+        //digitalWrite(OPEN_COFFEE,LOW);
       }
       // User wants 4 cups
       else if(request[0] == '4')
@@ -173,13 +188,13 @@ int main(int argc, char *argv[])
         printf("4 cups\n");
 
         // Open Water Valve
-        digitalWrite(6,HIGH);
-        delay(3000);
-        digitalWrite(6,LOW);
+        digitalWrite(OPEN_WATER,HIGH);
+        delay(3730);
+        digitalWrite(OPEN_WATER,LOW);
         // Open Coffee Valve
-        digitalWrite(5,HIGH);
+        digitalWrite(OPEN_COFFEE,HIGH);
         delay(3000);
-        digitalWrite(5,LOW);
+        digitalWrite(OPEN_COFFEE,LOW);
       }
       // User wants 6 cups
       else if(request[0] == '6')
@@ -187,13 +202,13 @@ int main(int argc, char *argv[])
         printf("6 cups\n");
 
         // Open Water Valve
-        digitalWrite(6,HIGH);
-        delay(3000);
-        digitalWrite(6,LOW);
+        digitalWrite(OPEN_WATER,HIGH);
+        delay(4900);
+        digitalWrite(OPEN_WATER,LOW);
         // Open Coffee Valve
-        digitalWrite(5,HIGH);
+        digitalWrite(OPEN_COFFEE,HIGH);
         delay(3000);
-        digitalWrite(5,LOW);
+        digitalWrite(OPEN_COFFEE,LOW);
       }
       // User wants 8 cups
       else if(request[0] == '8')
@@ -201,24 +216,22 @@ int main(int argc, char *argv[])
         printf("8 cups\n");
 
         // Open Water Valve
-        digitalWrite(6,HIGH);
-        delay(3000);
-        digitalWrite(6,LOW);
+        digitalWrite(OPEN_WATER,HIGH);
+        delay(6300);
+        digitalWrite(OPEN_WATER,LOW);
         // Open Coffee Valve
-        digitalWrite(5,HIGH);
+        digitalWrite(OPEN_COFFEE,HIGH);
         delay(3000);
-        digitalWrite(5,LOW);
+        digitalWrite(OPEN_COFFEE,LOW);
       }
     }
     // Close Coffee Valve
-    digitalWrite(4,HIGH);
-    delay(3000);
-    digitalWrite(4,LOW);
+    //digitalWrite(CLOSE_COFFEE,HIGH);
+    //delay(5000);
+    //digitalWrite(CLOSE_COFFEE,LOW);
 
     // Brew Status
-//    buf[0] = ALL_CLEAR;
-//
-    buf[0] = NO_WATER;
+    buf[0] = NO_FILTER;
     buf[1] = '\0';
 
     // Send brew status to the client to start countdown timer
@@ -231,9 +244,9 @@ int main(int argc, char *argv[])
     close(new_s);
 
     // Handling 180 degree rotation on the stepper motor
-    for(int i=0;i < 100;i++)
+    /*for(int i=0;i < 400;i++)
     {
-      motorStep = i%4;
+      motorStep = i%8;
       for( int j=0; j < 4; j++)
       {
         digitalWrite(j,motorStepArray[motorStep][j]);
@@ -242,15 +255,15 @@ int main(int argc, char *argv[])
     }
 
     // Turn motor off to save power
-    digitalWrite(0,LOW);
-    digitalWrite(1,LOW);
-    digitalWrite(2,LOW);
-    digitalWrite(3,LOW);
+    digitalWrite(MOTOR_AP,LOW);
+    digitalWrite(MOTOR_AN,LOW);
+    digitalWrite(MOTOR_BP,LOW);
+    digitalWrite(MOTOR_BN,LOW);
 
     // Turn on Coffee Pot
-    digitalWrite(7,HIGH);
+    digitalWrite(COFFEE_POT,HIGH);
     delay(3000);
-    digitalWrite(7,LOW);
+    digitalWrite(COFFEE_POT,LOW);*/
   }
 
   // Close all file descriptors
@@ -258,3 +271,37 @@ int main(int argc, char *argv[])
   close(s);
   return 0;
 }
+
+/****************************************************************
+ * This function will sample a ultrasonic range sensor and return 
+ * the closest distance the sensor can sense. The method converts
+ * the timing from the sensor into a distance in centimeters.
+ *
+ * Input:  trigPin  = The associated sensors trigger pin
+ *         echoPin  = The associated sensors echo pin
+ * Output: distance = The distance calculated by the sensor
+ * *************************************************************/
+int getDistance(unsigned int trigPin, unsigned int echoPin)
+{
+  long startTime,travelTime;
+  int distance;
+
+  // Send trigger pulse
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(20);
+  digitalWrite(trigPin, LOW);
+
+  // Wait for the echo from the trigger
+  while(digitalRead(echoPin) == LOW);
+  
+  // Calculate time by waiting for echo to end
+  startTime = micros();
+  while(digitalRead(echoPin) == HIGH);
+  travelTime= micros() - startTime;
+
+  // Convert time to distance in cm
+  distance = travelTime/58;
+
+  return distance;
+}
+
