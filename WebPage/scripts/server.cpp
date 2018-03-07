@@ -39,6 +39,7 @@
 #define NO_FILTER     '4'     // No clean filter to start brew
 
 int getDistance(unsigned int trigPin, unsigned int echoPin);
+int getWaterDelay(unsigned int cups);
 
 int main(int argc, char *argv[])
 {
@@ -48,6 +49,7 @@ int main(int argc, char *argv[])
   char buf[MAX_BYTES];
   int s, new_s;
   int bytesRead, bytesSent;
+  unsigned int waterDelay;
 
   // GPIO initialization
   wiringPiSetup();
@@ -130,8 +132,6 @@ int main(int argc, char *argv[])
     }
     // Null terminate the request to prevent garbage
     request[bytesRead] = 0;
-
-    printf("Distance: %d\n",getDistance(WATER_TRIG,WATER_ECHO)); 
     
     // Determine how many cups the user wants to brew
     if(request[0] == '1')
@@ -140,99 +140,65 @@ int main(int argc, char *argv[])
       if(request[1] == '0')
       {
         printf("10 cups\n");
-
-        // Open Water Valve
-        digitalWrite(OPEN_WATER,HIGH);
-        delay(8000);
-        digitalWrite(OPEN_WATER,LOW);
-        // Open Coffee Valve
-        digitalWrite(OPEN_COFFEE,HIGH);
-        delay(3000);
-        digitalWrite(OPEN_COFFEE,LOW);
+        waterDelay = getWaterDelay(10);
       }
       // User wants 12 cups
       else if(request[1] == '2')
       {
         printf("12 cups\n");
-
-        // Open Water Valve
-        digitalWrite(OPEN_WATER,HIGH);
-        delay(8800);
-        digitalWrite(OPEN_WATER,LOW);
-        // Open Coffee Valve
-        digitalWrite(OPEN_COFFEE,HIGH);
-        delay(3000);
-        digitalWrite(OPEN_COFFEE,LOW);
+        waterDelay = getWaterDelay(12);
       }
     }
     else
     {
-      // User wants 2 cups
-      if(request[0] == '2')
-      {
-        printf("2 cups\n");
-
-        // Open Water Valve
-        digitalWrite(OPEN_WATER,HIGH);
-        //delay(3300);
-        delay(8000);
-        digitalWrite(OPEN_WATER,LOW);
-        // Open Coffee Valve
-        //digitalWrite(OPEN_COFFEE,HIGH);
-        //delay(3000);
-        //digitalWrite(OPEN_COFFEE,LOW);
-      }
       // User wants 4 cups
-      else if(request[0] == '4')
+      if(request[0] == '4')
       {
         printf("4 cups\n");
-
-        // Open Water Valve
-        digitalWrite(OPEN_WATER,HIGH);
-        delay(3730);
-        digitalWrite(OPEN_WATER,LOW);
-        // Open Coffee Valve
-        digitalWrite(OPEN_COFFEE,HIGH);
-        delay(3000);
-        digitalWrite(OPEN_COFFEE,LOW);
+        waterDelay = getWaterDelay(4);
       }
       // User wants 6 cups
       else if(request[0] == '6')
       {
         printf("6 cups\n");
-
-        // Open Water Valve
-        digitalWrite(OPEN_WATER,HIGH);
-        delay(4900);
-        digitalWrite(OPEN_WATER,LOW);
-        // Open Coffee Valve
-        digitalWrite(OPEN_COFFEE,HIGH);
-        delay(3000);
-        digitalWrite(OPEN_COFFEE,LOW);
+        waterDelay = getWaterDelay(6);
       }
       // User wants 8 cups
       else if(request[0] == '8')
       {
         printf("8 cups\n");
-
-        // Open Water Valve
-        digitalWrite(OPEN_WATER,HIGH);
-        delay(6300);
-        digitalWrite(OPEN_WATER,LOW);
-        // Open Coffee Valve
-        digitalWrite(OPEN_COFFEE,HIGH);
-        delay(3000);
-        digitalWrite(OPEN_COFFEE,LOW);
+        waterDelay = getWaterDelay(8);
       }
     }
-    // Close Coffee Valve
-    //digitalWrite(CLOSE_COFFEE,HIGH);
-    //delay(5000);
-    //digitalWrite(CLOSE_COFFEE,LOW);
 
-    // Brew Status
-    buf[0] = NO_FILTER;
-    buf[1] = '\0';
+    if(waterDelay == 0)
+    {
+      // Report error to the user
+      buf[0] = NO_WATER;
+      buf[1] = '\0';
+    }
+    else
+    {
+      // Open Water Valve
+      digitalWrite(OPEN_WATER,HIGH);
+      delay(waterDelay);
+      digitalWrite(OPEN_WATER,LOW);
+      
+      // Open Coffee Valve
+      digitalWrite(OPEN_COFFEE,HIGH);
+      delay(3000);
+      digitalWrite(OPEN_COFFEE,LOW);
+      
+      // Close Coffee Valve
+      //digitalWrite(CLOSE_COFFEE,HIGH);
+      //delay(5000);
+      //digitalWrite(CLOSE_COFFEE,LOW);
+      
+      // Report succes to the user
+      buf[0] = ALL_CLEAR;
+      buf[1] = '\0';
+    }
+
 
     // Send brew status to the client to start countdown timer
     if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
@@ -305,3 +271,141 @@ int getDistance(unsigned int trigPin, unsigned int echoPin)
   return distance;
 }
 
+/****************************************************************
+ * This function will determine the delay time based on the
+ * current water level in the reservoir and the number of cups
+ * the user is trying to brew. The value return is the delay time
+ * the valve should be opened. Return value of zero means brew
+ * is not possible
+ *
+ * Input:  cups     = The amount of cups the user wants to brew
+ * Output: distance = The appropraite delay time for the current
+ *                    machine state.
+ * *************************************************************/
+int getWaterDelay(unsigned int cups)
+{
+  // Take 3 samples to find an accurate water level distance
+  int sample1 = getDistance(WATER_TRIG,WATER_ECHO);
+  int sample2 = getDistance(WATER_TRIG,WATER_ECHO);
+  int sample3 = getDistance(WATER_TRIG,WATER_ECHO);
+  int average = (sample1 + sample2 + sample3)/3;
+  printf("Distance: %i", average);
+
+  // Look up table based on cups and water level
+  switch(cups)
+  {
+    case 4:
+      if(average < 5)
+        return 3100;
+      else if(average >= 5 && average < 7)
+        return 3300;
+      else if(average >= 7 && average < 8)
+        return 3400;
+      else if(average >= 8 && average < 10)
+        return 3500;
+      else if(average >= 10 && average < 11)
+        return 3600;
+      else if(average >= 11 && average < 13)
+        return 3700;
+      else if(average >= 13 && average < 15)
+        return 3800;
+      else if(average >= 15 && average < 17)
+        return 4000;
+      else if(average >= 17 && average < 18)
+        return 4100;
+      else if(average >= 18 && average < 20)
+        return 4400;
+      else if(average >= 20 && average <= 21)
+        return 5000;
+      else
+        return 0;
+      break;
+    case 6:
+      if(average < 5)
+        return 4500;
+      else if(average >= 5 && average < 7)
+        return 4700;
+      else if(average >= 7 && average < 8)
+        return 4800;
+      else if(average >= 8 && average < 10)
+        return 5000;
+      else if(average >= 10 && average < 11)
+        return 5200;
+      else if(average >= 11 && average < 13)
+        return 5300;
+      else if(average >= 13 && average < 15)
+        return 5600;
+      else if(average >= 15 && average < 17)
+        return 6000;
+      else if(average >= 17 && average < 18)
+        return 6400;
+      else if(average >= 18 && average <= 20)
+        return 6800;
+      else
+        return 0;
+      break;
+    case 8:
+      if(average < 5)
+        return 5800;
+      else if(average >= 5 && average < 7)
+        return 6000;
+      else if(average >= 7 && average < 8)
+        return 6200;
+      else if(average >= 8 && average < 10)
+        return 6400;
+      else if(average >= 10 && average < 11)
+        return 6600;
+      else if(average >= 11 && average < 13)
+        return 6800;
+      else if(average >= 13 && average < 15)
+        return 7200;
+      else if(average >= 15 && average < 17)
+        return 7700;
+      else if(average >= 17 && average <= 18)
+        return 8100;
+      else
+        return 0;
+      break;
+    case 10:
+      if(average < 5)
+        return 7200;
+      else if(average >= 5 && average < 7)
+        return 7500;
+      else if(average >= 7 && average < 8)
+        return 7700;
+      else if(average >= 8 && average < 10)
+        return 8000;
+      else if(average >= 10 && average < 11)
+        return 8300;
+      else if(average >= 11 && average < 13)
+        return 8600;
+      else if(average >= 13 && average < 15)
+        return 8900;
+      else if(average >= 15 && average <= 17)
+        return 9400;
+      else
+        return 0;
+      break;
+    case 12:
+      if(average < 5)
+        return 8600;
+      else if(average >= 5 && average < 7)
+        return 8800;
+      else if(average >= 7 && average < 8)
+        return 9000;
+      else if(average >= 8 && average < 10)
+        return 9300;
+      else if(average >= 10 && average < 11)
+        return 9600;
+      else if(average >= 11 && average < 13)
+        return 9900;
+      else if(average >= 13 && average <= 15)
+        return 10400;
+      else
+        return 0;
+      break;
+    default:
+      return 0;
+  }
+  return 0;
+}
