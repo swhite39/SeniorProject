@@ -171,12 +171,14 @@ int main(int argc, char *argv[])
       }
     }
 
+    // Not enough water
     if(waterDelay == 0)
     {
       // Report error to the user
       buf[0] = NO_WATER;
       buf[1] = '\0';
     }
+    // All conditions met to start brew
     else
     {
       // Open Water Valve
@@ -190,9 +192,32 @@ int main(int argc, char *argv[])
       digitalWrite(OPEN_COFFEE,LOW);
       
       // Close Coffee Valve
-      //digitalWrite(CLOSE_COFFEE,HIGH);
-      //delay(5000);
-      //digitalWrite(CLOSE_COFFEE,LOW);
+      digitalWrite(CLOSE_COFFEE,HIGH);
+      delay(5000);
+      digitalWrite(CLOSE_COFFEE,LOW);
+
+
+      // Handling 180 degree rotation on the stepper motor
+      for(int i=0;i < 400;i++)
+      {
+        motorStep = i%8;
+        for( int j=0; j < 4; j++)
+        {
+          digitalWrite(j,motorStepArray[motorStep][j]);
+        }
+        delay(5);
+      }
+
+      // Turn motor off to save power
+      digitalWrite(MOTOR_AP,LOW);
+      digitalWrite(MOTOR_AN,LOW);
+      digitalWrite(MOTOR_BP,LOW);
+      digitalWrite(MOTOR_BN,LOW);
+
+      // Turn on Coffee Pot
+      digitalWrite(COFFEE_POT,HIGH);
+      delay(3000);
+      digitalWrite(COFFEE_POT,LOW);
       
       // Report succes to the user
       buf[0] = ALL_CLEAR;
@@ -208,28 +233,6 @@ int main(int argc, char *argv[])
       exit(1);
     }
     close(new_s);
-
-    // Handling 180 degree rotation on the stepper motor
-    /*for(int i=0;i < 400;i++)
-    {
-      motorStep = i%8;
-      for( int j=0; j < 4; j++)
-      {
-        digitalWrite(j,motorStepArray[motorStep][j]);
-      }
-      delay(5);
-    }
-
-    // Turn motor off to save power
-    digitalWrite(MOTOR_AP,LOW);
-    digitalWrite(MOTOR_AN,LOW);
-    digitalWrite(MOTOR_BP,LOW);
-    digitalWrite(MOTOR_BN,LOW);
-
-    // Turn on Coffee Pot
-    digitalWrite(COFFEE_POT,HIGH);
-    delay(3000);
-    digitalWrite(COFFEE_POT,LOW);*/
   }
 
   // Close all file descriptors
@@ -286,10 +289,12 @@ int getWaterDelay(unsigned int cups)
 {
   // Take 3 samples to find an accurate water level distance
   int sample1 = getDistance(WATER_TRIG,WATER_ECHO);
+  delay(100);
   int sample2 = getDistance(WATER_TRIG,WATER_ECHO);
+  delay(100);
   int sample3 = getDistance(WATER_TRIG,WATER_ECHO);
   int average = (sample1 + sample2 + sample3)/3;
-  printf("Distance: %i", average);
+  printf("Distance: %i\n", average);
 
   // Look up table based on cups and water level
   switch(cups)
