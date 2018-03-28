@@ -32,6 +32,11 @@
 #define MAX_BYTES     1500    // Maximum number of bytes per packet
 #define SERVER_PORT   "5000"
 
+// Brew Strength
+#define MILD          1
+#define NORMAL        2
+#define STRONG        3
+
 // Brew Status
 #define ALL_CLEAR     '1'     // Clear to start Brew
 #define NO_WATER      '2'     // Not enough water to start brew
@@ -40,6 +45,7 @@
 
 int getDistance(unsigned int trigPin, unsigned int echoPin);
 int getWaterDelay(unsigned int cups);
+int getCoffeeGrounds(int cups,int strength);
 
 int main(int argc, char *argv[])
 {
@@ -50,6 +56,8 @@ int main(int argc, char *argv[])
   int s, new_s;
   int bytesRead, bytesSent;
   unsigned int waterDelay;
+  int motorRotations;
+  int brewStrength = 0;
 
   // GPIO initialization
   wiringPiSetup();
@@ -63,6 +71,10 @@ int main(int argc, char *argv[])
   pinMode(COFFEE_POT, OUTPUT);
   pinMode(WATER_TRIG, OUTPUT); 
   pinMode(WATER_ECHO, INPUT); 
+  pinMode(MOTOR_AP+10, OUTPUT);
+  pinMode(MOTOR_AN+10, OUTPUT);
+  pinMode(MOTOR_BP+10, OUTPUT);
+  pinMode(MOTOR_BN+10, OUTPUT);
 
   // Motor step sequence
   int motorStep;
@@ -136,38 +148,70 @@ int main(int argc, char *argv[])
     // Determine how many cups the user wants to brew
     if(request[0] == '1')
     {
+      // Brew Strength is Normal
+      if(request[2] == 'N')
+      {
+        brewStrength = NORMAL;
+      }
+      // Brew Strength is Mild
+      else if(request[2] == 'M')
+      {
+        brewStrength = MILD;
+      }
+      // Brew Strength is Strong
+      else if(request[2] == 'S')
+      {
+        brewStrength = STRONG;
+      }
+
       // User wants 10 cups
       if(request[1] == '0')
       {
-        printf("10 cups\n");
         waterDelay = getWaterDelay(10);
+        motorRotations = getCoffeeGrounds(10,brewStrength);
       }
       // User wants 12 cups
       else if(request[1] == '2')
       {
-        printf("12 cups\n");
         waterDelay = getWaterDelay(12);
+        motorRotations = getCoffeeGrounds(12,brewStrength);
       }
     }
     else
     {
+      // Brew Strength is Normal
+      if(request[1] == 'N')
+      {
+        brewStrength = NORMAL;
+      }
+      // Brew Strength is Mild
+      else if(request[1] == 'M')
+      {
+        brewStrength = MILD;
+      }
+      // Brew Strength is Strong
+      else if(request[1] == 'S')
+      {
+        brewStrength = STRONG;
+      }
+
       // User wants 4 cups
       if(request[0] == '4')
       {
-        printf("4 cups\n");
         waterDelay = getWaterDelay(4);
+        motorRotations = getCoffeeGrounds(4,brewStrength);
       }
       // User wants 6 cups
       else if(request[0] == '6')
       {
-        printf("6 cups\n");
         waterDelay = getWaterDelay(6);
+        motorRotations = getCoffeeGrounds(6,brewStrength);
       }
       // User wants 8 cups
       else if(request[0] == '8')
       {
-        printf("8 cups\n");
         waterDelay = getWaterDelay(8);
+        motorRotations = getCoffeeGrounds(8,brewStrength);
       }
     }
 
@@ -177,6 +221,41 @@ int main(int argc, char *argv[])
       // Report error to the user
       buf[0] = NO_WATER;
       buf[1] = '\0';
+
+      // Send brew status to the client to start countdown timer
+      if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
+      {
+        close(s);
+        close(new_s);
+        exit(1);
+      }
+
+/*      // Open Coffee Valve
+      digitalWrite(OPEN_COFFEE,HIGH);
+      delay(5000);
+      digitalWrite(OPEN_COFFEE,LOW);
+
+      // Handling motor rotations to control the flow of coffee grounds
+      for(int i=0;i < motorRotations;i++)
+      {
+        motorStep = i%8;
+        for( int j=0; j < 4; j++)
+        {
+          digitalWrite(j+10,motorStepArray[motorStep][j]);
+        }
+        delay(3);
+      }
+
+      // Turn motor off to save power
+      digitalWrite(MOTOR_AP+10,LOW);
+      digitalWrite(MOTOR_AN+10,LOW);
+      digitalWrite(MOTOR_BP+10,LOW);
+      digitalWrite(MOTOR_BN+10,LOW);
+      
+      // Close Coffee Valve
+      digitalWrite(CLOSE_COFFEE,HIGH);
+      delay(5000);
+      digitalWrite(CLOSE_COFFEE,LOW);*/
     }
     // All conditions met to start brew
     else
@@ -188,8 +267,25 @@ int main(int argc, char *argv[])
       
       // Open Coffee Valve
       digitalWrite(OPEN_COFFEE,HIGH);
-      delay(3000);
+      delay(5000);
       digitalWrite(OPEN_COFFEE,LOW);
+
+      // Handling motor rotations to control the flow of coffee grounds
+      for(int i=0;i < motorRotations;i++)
+      {
+        motorStep = i%8;
+        for( int j=0; j < 4; j++)
+        {
+          digitalWrite(j+10,motorStepArray[motorStep][j]);
+        }
+        delay(3);
+      }
+
+      // Turn motor off to save power
+      digitalWrite(MOTOR_AP+10,LOW);
+      digitalWrite(MOTOR_AN+10,LOW);
+      digitalWrite(MOTOR_BP+10,LOW);
+      digitalWrite(MOTOR_BN+10,LOW);
       
       // Close Coffee Valve
       digitalWrite(CLOSE_COFFEE,HIGH);
@@ -197,7 +293,7 @@ int main(int argc, char *argv[])
       digitalWrite(CLOSE_COFFEE,LOW);
 
 
-      // Handling 180 degree rotation on the stepper motor
+      // Handling 180 degree rotation of the coffe filter carousel
       for(int i=0;i < 400;i++)
       {
         motorStep = i%8;
@@ -214,24 +310,27 @@ int main(int argc, char *argv[])
       digitalWrite(MOTOR_BP,LOW);
       digitalWrite(MOTOR_BN,LOW);
 
-      // Turn on Coffee Pot
-      digitalWrite(COFFEE_POT,HIGH);
-      delay(3000);
-      digitalWrite(COFFEE_POT,LOW);
-      
       // Report succes to the user
       buf[0] = ALL_CLEAR;
       buf[1] = '\0';
+
+      // Send brew status to the client to start countdown timer
+      if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
+      {
+        close(s);
+        close(new_s);
+        exit(1);
+      }
+
+      // Turn Coffee Pot on for 1 hour
+      digitalWrite(COFFEE_POT,HIGH);
+      for( int i=0; i < 360; i++)
+      {
+        delay(10000);
+      }
+      digitalWrite(COFFEE_POT,LOW);
     }
 
-
-    // Send brew status to the client to start countdown timer
-    if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
-    {
-      close(s);
-      close(new_s);
-      exit(1);
-    }
     close(new_s);
   }
 
@@ -408,6 +507,101 @@ int getWaterDelay(unsigned int cups)
         return 10400;
       else
         return 0;
+      break;
+    default:
+      return 0;
+  }
+  return 0;
+}
+
+/****************************************************************
+ * This function will determine the amount of motor rotations
+ * which will determine how much coffee grounds pass through the 
+ * valve into the filter. The rotations are determined by the
+ * number of cups being brewed and the strenth of the brew.
+ *
+ * Input:  strength   = The strength of the brew 
+ *                    (1 = MILD, 2 = NORMAL, 3 = STRONG)
+ *         cups       = The number of cups to brew
+ * Output: motorSteps = The appropraite motor steps to add the 
+ *                      correct amount of coffee grounds.
+ * *************************************************************/
+int getCoffeeGrounds(int cups,int strength)
+{
+  printf("Cups: %i\n", cups);
+  printf("Strength: %i\n", strength);
+
+  switch(cups)
+  {
+    case 4:
+      switch(strength)
+      {
+        case 1:
+          break;
+        case 2:
+          return 3200;
+          break;
+        case 3:
+          break;
+        default:
+          return 0;
+      }
+      break;
+    case 6:
+      switch(strength)
+      {
+        case 1:
+          break;
+        case 2:
+          return 4000;
+          break;
+        case 3:
+          break;
+        default:
+          return 0;
+      }
+      break;
+    case 8:
+      switch(strength)
+      {
+        case 1:
+          break;
+        case 2:
+          return 4800;
+          break;
+        case 3:
+          break;
+        default:
+          return 0;
+      }
+      break;
+    case 10:
+      switch(strength)
+      {
+        case 1:
+          break;
+        case 2:
+          return 5600;
+          break;
+        case 3:
+          break;
+        default:
+          return 0;
+      }
+      break;
+    case 12:
+      switch(strength)
+      {
+        case 1:
+          break;
+        case 2:
+          return 6400;
+          break;
+        case 3:
+          break;
+        default:
+          return 0;
+      }
       break;
     default:
       return 0;

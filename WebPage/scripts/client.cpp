@@ -21,11 +21,14 @@ int main( int argc, char *argv[] )
   char buf[MAX_BYTES];
   int byteCount;
   char *cups;
+  char *strength;
 
   if(argc > 1)
   {
     cups = argv[1];
+    strength = argv[2];
   }
+  strcat(cups,strength);
 
   // Translate host name into peer's IP address
   memset(&hints, 0, sizeof(hints));
