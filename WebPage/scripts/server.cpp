@@ -235,7 +235,6 @@ int main(int argc, char *argv[])
       motorStep = i%8;
 
       filterLevel = getDistance(FILTER_TRIG,FILTER_ECHO);
-      printf("Filter Level: %i\n", filterLevel);
       // Check for a clean filter in between every step of the motor
       // Stop stepping once a clean filter is found
       if( filterLevel <= 17 && filterLevel > 15)
@@ -273,7 +272,7 @@ int main(int argc, char *argv[])
       }
     }
     // Not enough coffee
-    else if(coffeeLevel >= 13)
+    else if(coffeeLevel == 13)
     {
       // Report error to the user
       buf[0] = NO_GROUNDS;
@@ -305,9 +304,9 @@ int main(int argc, char *argv[])
     else
     {
       // Open Water Valve
-/*      digitalWrite(OPEN_WATER,HIGH);
+      digitalWrite(OPEN_WATER,HIGH);
       delay(waterDelay);
-      digitalWrite(OPEN_WATER,LOW);*/
+      digitalWrite(OPEN_WATER,LOW);
       
       // Open Coffee Valve
       digitalWrite(OPEN_COFFEE,HIGH);
@@ -336,9 +335,8 @@ int main(int argc, char *argv[])
       delay(5000);
       digitalWrite(CLOSE_COFFEE,LOW);
 
-
       // Handling 180 degree rotation of the coffe filter carousel
-      for(int i=0;i < 400;i++)
+      for(int i=0;i < 210;i++)
       {
         motorStep = i%8;
         for( int j=0; j < 4; j++)
@@ -367,13 +365,13 @@ int main(int argc, char *argv[])
       }
 
       // Turn Coffee Pot on for 1 hour
-      /*digitalWrite(COFFEE_POT,HIGH);
+      digitalWrite(COFFEE_POT,HIGH);
       for( int i=0; i < 360; i++)
       {
         delay(10000);
       }
       digitalWrite(COFFEE_POT,LOW);
-      */
+      
     }
 
     close(new_s);
