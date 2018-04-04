@@ -26,6 +26,10 @@
 #define COFFEE_POT    7
 #define WATER_TRIG    8
 #define WATER_ECHO    9
+#define COFFEE_TRIG   14
+#define COFFEE_ECHO   15
+#define FILTER_TRIG   16
+#define FILTER_ECHO   29
 
 // Server Info
 #define MAX_PENDING   1       // Maximum number of pending connections on the socket
@@ -58,6 +62,7 @@ int main(int argc, char *argv[])
   unsigned int waterDelay;
   int motorRotations;
   int brewStrength = 0;
+  int coffeeLevel, filterLevel;
 
   // GPIO initialization
   wiringPiSetup();
@@ -75,6 +80,10 @@ int main(int argc, char *argv[])
   pinMode(MOTOR_AN+10, OUTPUT);
   pinMode(MOTOR_BP+10, OUTPUT);
   pinMode(MOTOR_BN+10, OUTPUT);
+  pinMode(COFFEE_TRIG, OUTPUT); 
+  pinMode(COFFEE_ECHO, INPUT); 
+  pinMode(FILTER_TRIG, OUTPUT); 
+  pinMode(FILTER_ECHO, INPUT); 
 
   // Motor step sequence
   int motorStep;
@@ -215,6 +224,39 @@ int main(int argc, char *argv[])
       }
     }
 
+    // Check the coffee reservir for sufficient grounds
+    coffeeLevel = getDistance(COFFEE_TRIG,COFFEE_ECHO);
+    printf("Coffee Level: %i\n", coffeeLevel);
+
+
+    // Checking for clean filter
+    for(int i=0;i < 400;i++)
+    {
+      motorStep = i%8;
+
+      filterLevel = getDistance(FILTER_TRIG,FILTER_ECHO);
+      printf("Filter Level: %i\n", filterLevel);
+      // Check for a clean filter in between every step of the motor
+      // Stop stepping once a clean filter is found
+      if( filterLevel <= 17 && filterLevel > 15)
+      {
+        i = 400;
+        printf("Found Filter \n");
+        filterLevel = 0;
+      }
+      for( int j=0; j < 4; j++)
+      {
+        digitalWrite(j,motorStepArray[motorStep][j]);
+      }
+      delay(5);
+    }
+
+    // Turn motor off to save power
+    digitalWrite(MOTOR_AP,LOW);
+    digitalWrite(MOTOR_AN,LOW);
+    digitalWrite(MOTOR_BP,LOW);
+    digitalWrite(MOTOR_BN,LOW);
+
     // Not enough water
     if(waterDelay == 0)
     {
@@ -229,41 +271,43 @@ int main(int argc, char *argv[])
         close(new_s);
         exit(1);
       }
+    }
+    // Not enough coffee
+    else if(coffeeLevel >= 13)
+    {
+      // Report error to the user
+      buf[0] = NO_GROUNDS;
+      buf[1] = '\0';
 
-/*      // Open Coffee Valve
-      digitalWrite(OPEN_COFFEE,HIGH);
-      delay(5000);
-      digitalWrite(OPEN_COFFEE,LOW);
-
-      // Handling motor rotations to control the flow of coffee grounds
-      for(int i=0;i < motorRotations;i++)
+      // Send brew status to the client to start countdown timer
+      if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
       {
-        motorStep = i%8;
-        for( int j=0; j < 4; j++)
-        {
-          digitalWrite(j+10,motorStepArray[motorStep][j]);
-        }
-        delay(3);
+        close(s);
+        close(new_s);
+        exit(1);
       }
+    }
+    else if(filterLevel != 0)
+    {
+      // Report error to the user
+      buf[0] = NO_FILTER;
+      buf[1] = '\0';
 
-      // Turn motor off to save power
-      digitalWrite(MOTOR_AP+10,LOW);
-      digitalWrite(MOTOR_AN+10,LOW);
-      digitalWrite(MOTOR_BP+10,LOW);
-      digitalWrite(MOTOR_BN+10,LOW);
-      
-      // Close Coffee Valve
-      digitalWrite(CLOSE_COFFEE,HIGH);
-      delay(5000);
-      digitalWrite(CLOSE_COFFEE,LOW);*/
+      // Send brew status to the client to start countdown timer
+      if( (bytesSent = send(new_s, &buf, bytesRead,0)) < 0)
+      {
+        close(s);
+        close(new_s);
+        exit(1);
+      }
     }
     // All conditions met to start brew
     else
     {
       // Open Water Valve
-      digitalWrite(OPEN_WATER,HIGH);
+/*      digitalWrite(OPEN_WATER,HIGH);
       delay(waterDelay);
-      digitalWrite(OPEN_WATER,LOW);
+      digitalWrite(OPEN_WATER,LOW);*/
       
       // Open Coffee Valve
       digitalWrite(OPEN_COFFEE,HIGH);
@@ -323,12 +367,13 @@ int main(int argc, char *argv[])
       }
 
       // Turn Coffee Pot on for 1 hour
-      digitalWrite(COFFEE_POT,HIGH);
+      /*digitalWrite(COFFEE_POT,HIGH);
       for( int i=0; i < 360; i++)
       {
         delay(10000);
       }
       digitalWrite(COFFEE_POT,LOW);
+      */
     }
 
     close(new_s);
@@ -369,6 +414,7 @@ int getDistance(unsigned int trigPin, unsigned int echoPin)
 
   // Convert time to distance in cm
   distance = travelTime/58;
+  //distance = travelTime/6;
 
   return distance;
 }
@@ -393,7 +439,7 @@ int getWaterDelay(unsigned int cups)
   delay(100);
   int sample3 = getDistance(WATER_TRIG,WATER_ECHO);
   int average = (sample1 + sample2 + sample3)/3;
-  printf("Distance: %i\n", average);
+  printf("Water Distance: %i\n", average);
 
   // Look up table based on cups and water level
   switch(cups)
@@ -537,11 +583,13 @@ int getCoffeeGrounds(int cups,int strength)
       switch(strength)
       {
         case 1:
+          return 2400;
           break;
         case 2:
-          return 3200;
+          return 2800;
           break;
         case 3:
+          return 3200;
           break;
         default:
           return 0;
@@ -551,11 +599,13 @@ int getCoffeeGrounds(int cups,int strength)
       switch(strength)
       {
         case 1:
+          return 2800;
           break;
         case 2:
-          return 4000;
+          return 3600;
           break;
         case 3:
+          return 4200;
           break;
         default:
           return 0;
@@ -565,11 +615,13 @@ int getCoffeeGrounds(int cups,int strength)
       switch(strength)
       {
         case 1:
+          return 4400;
           break;
         case 2:
-          return 4800;
+          return 5000;
           break;
         case 3:
+          return 5600;
           break;
         default:
           return 0;
@@ -579,11 +631,13 @@ int getCoffeeGrounds(int cups,int strength)
       switch(strength)
       {
         case 1:
+          return 5000;
           break;
         case 2:
-          return 5600;
+          return 5800;
           break;
         case 3:
+          return 6400;
           break;
         default:
           return 0;
@@ -593,11 +647,13 @@ int getCoffeeGrounds(int cups,int strength)
       switch(strength)
       {
         case 1:
+          return 5800;
           break;
         case 2:
           return 6400;
           break;
         case 3:
+          return 7200;
           break;
         default:
           return 0;
