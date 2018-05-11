@@ -259,6 +259,24 @@ int main(int argc, char *argv[])
     // Not enough water
     if(waterDelay == 0)
     {
+
+      // Handling 180 degree rotation of the coffe filter carousel
+      for(int i=0;i < 210;i++)
+      {
+        motorStep = i%8;
+        for( int j=0; j < 4; j++)
+        {
+          digitalWrite(j,motorStepArray[motorStep][j]);
+        }
+        delay(5);
+      }
+
+      // Turn motor off to save power
+      digitalWrite(MOTOR_AP,LOW);
+      digitalWrite(MOTOR_AN,LOW);
+      digitalWrite(MOTOR_BP,LOW);
+      digitalWrite(MOTOR_BN,LOW);
+
       // Report error to the user
       buf[0] = NO_WATER;
       buf[1] = '\0';
@@ -272,7 +290,7 @@ int main(int argc, char *argv[])
       }
     }
     // Not enough coffee
-    else if(coffeeLevel == 13)
+    else if(coffeeLevel >= 14)
     {
       // Report error to the user
       buf[0] = NO_GROUNDS;
@@ -302,7 +320,7 @@ int main(int argc, char *argv[])
     }
     // All conditions met to start brew
     else
-    {
+    {/*
       // Open Water Valve
       digitalWrite(OPEN_WATER,HIGH);
       delay(waterDelay);
@@ -351,7 +369,7 @@ int main(int argc, char *argv[])
       digitalWrite(MOTOR_AN,LOW);
       digitalWrite(MOTOR_BP,LOW);
       digitalWrite(MOTOR_BN,LOW);
-
+*/
       // Report succes to the user
       buf[0] = ALL_CLEAR;
       buf[1] = '\0';
@@ -364,13 +382,14 @@ int main(int argc, char *argv[])
         exit(1);
       }
 
-      // Turn Coffee Pot on for 1 hour
+  /*    // Turn Coffee Pot on for 1 hour
       digitalWrite(COFFEE_POT,HIGH);
       for( int i=0; i < 360; i++)
       {
         delay(10000);
       }
       digitalWrite(COFFEE_POT,LOW);
+      */
       
     }
 
